@@ -245,7 +245,7 @@ export default function ContactSection() {
                       <option value="موقع شخصي (بورتفوليو)" className="bg-slate-900">👤 موقع شخصي أو معرض أعمال (Portfolio)</option>
                       <option value="صفحة هبوط / صفحة واحدة" className="bg-slate-900">🚀 صفحة هبوط تسويقية (Landing Page)</option>
                       <option value="برمجيات وحلول قانونية (Lex Office)" className="bg-slate-900">⚖️ برمجيات وحلول قانونية (Lex Office)</option>
-                      <option value="تخصيص أنظمة Odoo ERP" className="bg-slate-900">⚙️ تخصيص أنظمة إبدارة الموارد Odoo ERP</option>
+                      <option value="تخصيص أنظمة Odoo ERP" className="bg-slate-900">⚙️ تخصيص أنظمة إدارة الموارد Odoo ERP</option>
                       <option value="تطبيق موبايل (React Native)" className="bg-slate-900">📱 تطبيق موبايل (أندرويد / آيفون)</option>
                       <option value="برمجيات مخصصة أخرى" className="bg-slate-900">💻 برمجيات سطح مكتب أو حلول مخصصة</option>
                     </select>
