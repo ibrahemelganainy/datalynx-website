@@ -10,6 +10,9 @@ import {
   faMobileScreenButton,
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useLocale } from './LocaleProvider';
+import { portfolioContent } from '../portfolioContent';
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.25 } },
@@ -35,7 +38,11 @@ const accentClasses = {
   },
 };
 
-const projects = [
+/*
+ * بيانات المشاريع الثابتة (لا تتغير بين اللغتين): الأكواد والشعارات
+ * وأصناف الألوان. النصوص القابلة للترجمة تأتي من portfolioContent.
+ */
+const projectBases = [
   {
     code: 'DL / 01',
     key: 'lex-office',
@@ -43,24 +50,11 @@ const projects = [
     platformTag: 'Desktop ERP',
     platformIcon: faDesktop,
     accent: accentClasses['datalynx-primary'],
-    status: 'نشط ومتاح',
     statusColor: 'bg-emerald-400',
     logo: '/lex_office_logo.png',
-    caption: 'Fig. 01 — واجهة Lex Office',
-    description:
-      'نظام رقمي ذكي متكامل لإدارة مكاتب المحاماة والشركات القانونية. أتمتة كاملة للقضايا والجلسات والمواعيد وحفظ المستندات، مع دعم العمل الأوفلاين وقواعد بيانات محلية بالكامل.',
-    specs: [
-      { label: 'المنصة', value: 'Windows Desktop' },
-      { label: 'قاعدة البيانات', value: 'محلية بالكامل' },
-      { label: 'المزامنة', value: 'تطبيق الموبايل' },
-      { label: 'الأمان', value: 'تشفير كامل للبيانات' },
-    ],
-    tags: ['إدارة شاملة للقضايا والأجندة', 'حماية عالية وتشفير للبيانات', 'قواعد بيانات محليّة وسريعة', 'مزامنة مع تطبيق الموبايل'],
-    primaryCta: { label: 'إستكشف  Lex Office', href: 'https://lexoffice.datalynx.space' },
-    secondaryCta: {
-      label: 'طلب تجربة النظام',
-      href: 'https://wa.me/201507071671?text=أود%20الاستفسار%20عن%20نظام%20Lex%20Office',
-    },
+    primaryHref: 'https://lexoffice.datalynx.space',
+    secondaryHref:
+      'https://wa.me/201507071671?text=أود%20الاستفسار%20عن%20نظام%20Lex%20Office',
   },
   {
     code: 'DL / 02',
@@ -69,28 +63,38 @@ const projects = [
     platformTag: 'Mobile App',
     platformIcon: faMobileScreenButton,
     accent: accentClasses['lex-gold'],
-    status: 'نشط ومتاح',
     statusColor: 'bg-emerald-400',
     logo: '/logo1.png',
-    caption: 'Fig. 02 — واجهة Lex Calendar',
-    description:
-      'تطبيق الهواتف المحمولة المخصص لمزامنة الأجندة والمواعيد والجلسات لحظياً. إشعارات فورية بالمواعيد القادمة ومتابعة جدول الجلسات اليومية من أي مكان، مع دعم التخزين أوفلاين.',
-    specs: [
-      { label: 'المنصة', value: 'Android & iOS' },
-      { label: 'المزامنة', value: 'فورية مع Lex Office' },
-      { label: 'الإشعارات', value: 'تنبيهات لحظية' },
-      { label: 'التقنية', value: 'Expo / React Native' },
-    ],
-    tags: ['تنبيهات فورية بالمواعيد والجلسات', 'مزامنة فورية مع Lex Office', 'يعمل على أندرويد و iOS', 'واجهة سريعة وسهلة الاستخدام'],
-    primaryCta: { label: 'إستكشف Lex Calendar', href: 'https://lexoffice.datalynx.space' },
-    secondaryCta: {
-      label: 'طلب النسخة التجريبية',
-      href: 'https://wa.me/201507071671?text=أود%20الاستفسار%20عن%20تطبيق%20Lex%20Calendar',
-    },
+    primaryHref: 'https://lexoffice.datalynx.space',
+    secondaryHref:
+      'https://wa.me/201507071671?text=أود%20الاستفسار%20عن%20تطبيق%20Lex%20Calendar',
   },
 ];
 
 export default function Portfolio() {
+  const { locale } = useLocale();
+
+  const content = portfolioContent[locale] || portfolioContent.ar;
+
+  /* دمج النصوص المترجمة مع البيانات الثابتة بنفس الترتيب. */
+  const projects = projectBases.map((base) => {
+    const text = content.projects[base.key];
+
+    return {
+      ...base,
+      status: content.status,
+      caption: text.caption,
+      description: text.description,
+      tags: text.tags,
+      specs: text.specs.map((spec) => ({
+        label: content.specLabels[spec.key],
+        value: spec.value,
+      })),
+      primaryCta: { label: text.primaryCta, href: base.primaryHref },
+      secondaryCta: { label: text.secondaryCta, href: base.secondaryHref },
+    };
+  });
+
   return (
     <section id="portfolio" dir="rtl" className="py-28 bg-[#020617] relative overflow-hidden text-right">
 
@@ -111,17 +115,17 @@ export default function Portfolio() {
           className="mb-16 max-w-2xl"
         >
           <div className="flex items-center gap-3 mb-6 font-mono text-xs tracking-[0.2em] text-datalynx-primary/80">
-            <span>٠٢</span>
+            <span>{content.index}</span>
             <span className="w-8 h-px bg-datalynx-primary/40" />
-            <span>ARCHIVE</span>
+            <span>{content.label}</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-6">
-            نماذج فعلية من أنظمة{' '}
-            <span className="text-datalynx-primary">تعمل بالفعل</span> في مكاتب حقيقية
+            {content.titleBefore}{' '}
+            <span className="text-datalynx-primary">{content.titleHighlight}</span>{' '}
+            {content.titleAfter}
           </h2>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-            مش عرض تقديمي — دي منتجات مطوَّرة وشغّالة فعلياً، وكل نظام منها جزء
-            من بنية متكاملة صممناها لخدمة قطاع قانوني حقيقي.
+            {content.intro}
           </p>
         </motion.div>
 

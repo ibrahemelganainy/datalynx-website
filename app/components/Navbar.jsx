@@ -1,7 +1,42 @@
 'use client';
+
+import { usePathname } from 'next/navigation';
+
+import { useLocale } from './LocaleProvider';
+import { getAlternatePath, TOOLS_SITE_URL } from '../lib/i18n/config';
 import React, { useState, useEffect } from 'react'
 
 export default function Navbar() {
+  const { locale } = useLocale();
+
+  const pathname = usePathname();
+
+  /*
+   * مسار الصفحة المكافئة في اللغة الأخرى.
+   *
+   * كان يعيد null للصفحة الرئيسية، فكان الزر يظهر معطّلًا (opacity-40)
+   * ولا يعمل إطلاقًا. السبب أن النسخة الإنجليزية للصفحة الرئيسية كانت
+   * غير موجودة. بعد إضافة /en أصبح المسار متاحًا دائمًا وزر التبديل
+   * يعمل من كل صفحة.
+   */
+  const alternatePath = getAlternatePath(pathname, locale);
+
+  const isEnglish = locale === 'en';
+
+  /*
+   * مسار الصفحة الرئيسية داخل اللغة الحالية. الصفحة الرئيسية العربية
+   * على الجذر "/" وكانت روابط النافبار تستخدم الرابط المطلق
+   * https://datalynx.space مباشرة، وهو ما يخرج من معاينة localhost.
+   */
+  const homeHref = isEnglish ? '/en' : '/';
+
+  /*
+   * قسم التواصل. على الصفحة الرئيسية نكتفي بالمرساة، ومن أي صفحة أخرى
+   * نعود أولًا إلى الرئيسية ثم إلى القسم، حتى يعمل الزر في كل الصفحات
+   * بدل أن يكون رابطًا ميتًا.
+   */
+  const contactHref = pathname === homeHref ? '#contact' : `${homeHref}#contact`;
+
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
 
@@ -14,12 +49,45 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  /*
+   * روابط التنقل.
+   *
+   * قراران مقصودان هنا:
+   *
+   * 1. حُذف رابط "سياسة الخصوصية" من النافبار بالكامل (هو ورابط
+   *    "الخصوصية" الذي كان يقود إلى نفس القسم). الصفحة نفسها ما زالت
+   *    موجودة على /privacy و/en/privacy، والوصول إليها متاح من التذييل
+   *    (Footer) كما هو مطلوب.
+   *
+   * 2. روابط الأقسام داخل الصفحة الرئيسية لم تعد تستخدم "#services"
+   *    كرابط مطلق يبقى في العنوان؛ بل أصبحت "#services" فقط للروابط
+   *    داخل نفس الصفحة، و"/#services" عند الانتقال من صفحة أخرى. النتيجة
+   *    أن شريط العنوان لا يعرض علامة # بعد النقر، والعنوان يبقى
+   *    /about مثلًا بدل /about#services.
+   *
+   * الرابط الأول ("/") لا يحتاج # لأنه أعلى الصفحة.
+   */
   const navLinks = [
-    { name: 'الرئيسية', href: 'https://datalynx.space' },
-    { name: 'المنتجات', href: '#services' },
-    { name: 'أعمالنا', href: '#portfolio' }, // تم التعديل هنا
-    { name: 'الخصوصية', href: '#privacy' },
-    
+    { name: isEnglish ? 'Home' : 'الرئيسية', href: homeHref },
+    {
+      name: isEnglish ? 'Services' : 'خدماتنا',
+      href: pathname === homeHref ? '#services' : `${homeHref}#services`,
+    },
+    {
+      name: isEnglish ? 'Our Work' : 'أعمالنا',
+      href: pathname === homeHref ? '#portfolio' : `${homeHref}#portfolio`,
+    },
+    { name: isEnglish ? 'About Us' : 'من نحن', href: isEnglish ? '/en/about' : '/about' },
+    { name: isEnglish ? 'Contact Us' : 'اتصل بنا', href: isEnglish ? '/en/contact' : '/contact' },
+    /*
+     * رابط خارجي إلى أدوات Data Lynx على النطاق الفرعي. نطاق مختلف، لذا
+     * يُفتح في تبويب جديد مع rel="noopener noreferrer".
+     */
+    {
+      name: isEnglish ? 'Tools' : 'الأدوات',
+      href: TOOLS_SITE_URL,
+      external: true,
+    },
   ]
 
   return (
@@ -27,7 +95,7 @@ export default function Navbar() {
       isScrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm py-3' : 'bg-transparent py-5'
     }`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        
+
         {/* Logo Section (تم استبدال الصورة بحرفي D و L مع تأثير حركي وميل عصري) */}
         <div className="flex items-center gap-3 group cursor-pointer">
           {/* الحاوية الخارجية للشعار - مقاسات متجاوبة */}
@@ -54,7 +122,7 @@ export default function Navbar() {
 
           <div className="flex flex-col">
             <span className={`text-xl font-black tracking-tight leading-none transition-colors duration-300 ${
-              isScrolled 
+              isScrolled
                 ? 'text-datalynx-dark' // عند السكرول: أسود على الكل
                 : 'text-white md:text-white' // الحالة العادية: أبيض على الموبايل وأبيض على الشاشات الكبيرة
             }`}>
@@ -65,11 +133,14 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
+              {...(link.external
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {})}
               className={`text-sm font-bold transition-colors hover:text-datalynx-primary ${
                 isScrolled ? 'text-slate-600' : 'text-slate-600 md:text-slate-200 md:hover:text-white'
               }`}
@@ -77,16 +148,38 @@ export default function Navbar() {
               {link.name}
             </a>
           ))}
-          <a 
-            href="#contact" 
+
+          {/*
+            مبدّل اللغة (سطح المكتب).
+
+            لكل صفحة على الموقع نسخة في اللغة الأخرى (الصفحة الرئيسية
+            أصبحت /en)، لذلك يظهر الزر كرابط فعّال دائمًا ولا يوجد فرع
+            "معطّل" بعد الآن.
+          */}
+          <a
+            data-lang-switcher="desktop"
+            href={alternatePath}
+            lang={isEnglish ? 'ar' : 'en'}
+            aria-label={isEnglish ? 'التبديل إلى العربية' : 'Switch to English'}
+            className={`px-3.5 py-2 rounded-full border text-xs font-bold transition-colors ${
+              isScrolled
+                ? 'border-slate-200 text-slate-600 hover:text-datalynx-primary hover:border-datalynx-primary/40'
+                : 'border-white/20 text-slate-200 hover:text-white hover:border-white/40'
+            }`}
+          >
+            {isEnglish ? 'AR' : 'EN'}
+          </a>
+
+          <a
+            href={contactHref}
             className="px-6 py-2.5 bg-datalynx-primary hover:bg-blue-600 text-white text-sm font-bold rounded-full transition-all shadow-md hover:shadow-blue-500/20 transform hover:-translate-y-0.5"
           >
-           تواصل معنا الان
+           {isEnglish ? 'Contact us now' : 'تواصل معنا الان'}
           </a>
         </div>
 
         {/* Mobile Menu Button */}
-      <button 
+      <button
         className={`md:hidden p-2 transition-colors duration-300 ${
           isScrolled ? 'text-datalynx-dark' : 'text-white'
         }`}
@@ -108,6 +201,9 @@ export default function Navbar() {
             <a
               key={link.name}
               href={link.href}
+              {...(link.external
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {})}
               onClick={() => setIsOpen(false)}
               className="text-lg font-bold text-datalynx-dark hover:text-datalynx-primary"
             >
@@ -115,11 +211,26 @@ export default function Navbar() {
             </a>
           ))}
           <hr className="border-slate-100" />
-          <a 
-            href="#contact" 
+          <a
+            href={contactHref}
+            onClick={() => setIsOpen(false)}
             className="w-full py-4 bg-datalynx-dark text-white text-center rounded-2xl font-bold"
           >
-           تواصل معنا الان
+           {isEnglish ? 'Contact us now' : 'تواصل معنا الان'}
+          </a>
+          {/* مبدّل اللغة (الجوال) — رابط فعّال في كل الصفحات */}
+          <a
+            data-lang-switcher="mobile"
+            href={alternatePath}
+            lang={isEnglish ? 'ar' : 'en'}
+            onClick={() => setIsOpen(false)}
+            aria-label={isEnglish ? 'التبديل إلى العربية' : 'Switch to English'}
+            className="inline-flex items-center gap-2 self-start px-4 py-2 rounded-full border border-slate-200 text-sm font-bold text-datalynx-dark hover:text-datalynx-primary hover:border-datalynx-primary/40 transition-colors"
+          >
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              {isEnglish ? 'AR' : 'EN'}
+            </span>
+            <span>{isEnglish ? 'العربية' : 'English'}</span>
           </a>
         </div>
       </div>

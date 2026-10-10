@@ -1,51 +1,28 @@
 'use client';
 
 import React, { useRef } from 'react';
+import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faShieldHalved, 
-  faUserShield, 
-  faHandshake, 
-  faServer 
+import {
+  faShieldHalved,
+  faUserShield,
+  faHandshake,
+  faServer
 } from '@fortawesome/free-solid-svg-icons';
 
-const privacyPoints = [
-  {
-    id: '01',
-    title: 'حماية شاملة وتشفير متقدم',
-    description:
-      'نطبق أحدث بروتوكولات الأمان والتشفير في جميع منتجاتنا البرمجية، لضمان بقاء بيانات نشاطك التجاري ومعلوماتك في بيئة آمنة تماماً ضد أي وصول غير مصرح به.',
-    icon: <FontAwesomeIcon icon={faShieldHalved} />,
-    colorClass: 'text-datalynx-primary bg-datalynx-primary/10 border-datalynx-primary/20',
-  },
-  {
-    id: '02',
-    title: 'السيادة التامة على بياناتك',
-    description:
-      'نؤمن بأن بياناتك هي ملكك وحدك. لا نقوم في Data Lynx بجمع أو تحليل أو استخدام بيانات عملائنا لأي أغراض تجارية أو تدريبية، ونمنحك التحكم الكامل في إدارتها.',
-    icon: <FontAwesomeIcon icon={faUserShield} />,
-    colorClass: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  },
-  {
-    id: '03',
-    title: 'الشفافية وعدم المشاركة',
-    description:
-      'نلتزم التزاماً قاطعاً بعدم بيع أو مشاركة أي معلومات تخص عملائنا مع أي أطراف ثالثة أو جهات إعلانية. علاقتنا مبنية على الثقة والوضوح التام.',
-    icon: <FontAwesomeIcon icon={faHandshake} />,
-    colorClass: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  },
-  {
-    id: '04',
-    title: 'الموثوقية واستمرارية الأعمال',
-    description:
-      'نصمم بنية أنظمتنا لتكون مستقرة وموثوقة، مع توفير آليات قوية لحفظ واسترجاع البيانات لضمان استمرارية أعمالك دون أي قلق من فقدان المعلومات.',
-    icon: <FontAwesomeIcon icon={faServer} />,
-    colorClass: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  },
+import { useLocale } from './LocaleProvider';
+import { privacySectionContent as sectionContent } from '../privacySectionContent';
+
+/* الأيقونات لا تُترجم، فتبقى بترتيب النقاط نفسه. */
+const pointIcons = [
+  <FontAwesomeIcon icon={faShieldHalved} key="shield" />,
+  <FontAwesomeIcon icon={faUserShield} key="user" />,
+  <FontAwesomeIcon icon={faHandshake} key="handshake" />,
+  <FontAwesomeIcon icon={faServer} key="server" />,
 ];
 
-function ClauseRow({ point, index }) {
+function ClauseRow({ point, index, clauseLabel }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 24 }}
@@ -71,7 +48,7 @@ function ClauseRow({ point, index }) {
             {point.icon}
           </span>
           <span className="font-mono text-xs font-bold text-slate-400 tracking-wider">
-            المادة {point.id}
+            {clauseLabel} {point.id}
           </span>
         </div>
         <h3 className="text-xl font-bold text-white mb-2">{point.title}</h3>
@@ -84,6 +61,15 @@ function ClauseRow({ point, index }) {
 }
 
 export default function PrivacySection() {
+  const { locale, lhref } = useLocale();
+
+  const content = sectionContent[locale] || sectionContent.ar;
+
+  const privacyPoints = content.points.map((point, index) => ({
+    ...point,
+    icon: pointIcons[index],
+  }));
+
   const listRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: listRef,
@@ -93,7 +79,7 @@ export default function PrivacySection() {
 
   return (
     <section id="privacy" dir="rtl" className="relative min-h-screen py-24 bg-[#020617] text-right overflow-hidden flex items-center">
-      
+
       {/* نفس خلفية الهيرو تماماً (إضاءات وشبكة برمجية) */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         {/* شبكة برمجية خفيفة */}
@@ -115,17 +101,18 @@ export default function PrivacySection() {
           className="max-w-2xl mb-16"
         >
           <div className="flex items-center gap-3 mb-6 font-mono text-xs tracking-[0.2em] text-datalynx-primary/90">
-            <span>٠٣</span>
+            <span>{content.index}</span>
             <span className="w-8 h-px bg-datalynx-primary/40" />
-            <span>TRUST &amp; SECURITY</span>
+            <span>{content.label}</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-5">
-            الثقة هي أساس <span className="bg-clip-text text-transparent bg-gradient-to-r from-datalynx-primary to-blue-300">حلولنا البرمجية</span>
+            {content.titleLine1}{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-datalynx-primary to-blue-300">
+              {content.titleHighlight}
+            </span>
           </h2>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-            في <strong className="text-white">Data Lynx</strong>، نضع خصوصية وأمان معلومات
-            عملائنا في مقدمة أولوياتنا. سواء كنت تستخدم أنظمتنا السحابية، تطبيقات
-            الهواتف، أو برمجيات سطح المكتب، فإننا نضمن لك بيئة تقنية آمنة ومستقلة.
+            {content.intro}
           </p>
         </motion.div>
 
@@ -142,7 +129,12 @@ export default function PrivacySection() {
 
           <div className="pt-1">
             {privacyPoints.map((point, i) => (
-              <ClauseRow key={point.id} point={point} index={i} />
+              <ClauseRow
+                key={point.id}
+                point={point}
+                index={i}
+                clauseLabel={content.clauseLabel}
+              />
             ))}
           </div>
         </div>
@@ -157,21 +149,33 @@ export default function PrivacySection() {
         >
           <div className="space-y-2 text-center md:text-right">
             <h4 className="text-xl font-bold text-white">
-              هل لديك استفسارات حول أمان أنظمتنا؟
+              {content.ctaTitle}
             </h4>
             <p className="text-slate-400 text-sm md:text-base">
-              فريقنا التقني مستعد دائماً للإجابة على كافة تساؤلاتك حول معايير
-              الأمان والتشفير التي نعتمدها في منتجاتنا.
+              {content.ctaText}
             </p>
           </div>
-          <a
-            href="https://wa.me/201507071671"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-8 py-3.5 bg-datalynx-primary hover:bg-blue-600 text-white font-bold rounded-2xl transition-all whitespace-nowrap text-sm md:text-base shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
-          >
-            تواصل مع الدعم الفني
-          </a>
+          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+            <a
+              href="https://wa.me/201507071671"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-3.5 bg-datalynx-primary hover:bg-blue-600 text-white font-bold rounded-2xl transition-all whitespace-nowrap text-sm md:text-base shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+            >
+              {content.ctaButton}
+            </a>
+            {/*
+              رابط سياسة الخصوصية. أُزيل من النافبار بناءً على الطلب،
+              وهذا الرابط داخل قسم الثقة والخصوصية يبقى لأنه في صميم
+              موضوعه، ويقود إلى الصفحة الكاملة /privacy أو /en/privacy.
+            */}
+            <Link
+              href={lhref('privacy')}
+              className="px-6 py-3.5 bg-slate-800 border border-slate-700 text-white font-bold rounded-2xl text-sm md:text-base hover:bg-slate-700 transition-all whitespace-nowrap cursor-pointer"
+            >
+              {locale === 'en' ? 'Read the full policy' : 'اقرأ السياسة كاملة'}
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>

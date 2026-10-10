@@ -16,12 +16,22 @@ import {
   faFileCode
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useLocale } from './LocaleProvider';
+import { TOOLS_SITE_URL } from '../lib/i18n/config';
+import { contactSectionContent } from '../contactSectionContent';
+
 export default function ContactSection() {
+  const { locale } = useLocale();
+
+  const isEnglish = locale === 'en';
+
+  const content = contactSectionContent[locale] || contactSectionContent.ar;
+
   // حالات حقول الإدخال لتجميع البيانات وإرسالها للواتساب
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    service: 'موقع تجاري متكامل',
+    service: content.serviceOptions[0],
     message: ''
   });
 
@@ -36,16 +46,18 @@ export default function ContactSection() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // رقم الواتساب الخاص بك
     const whatsappNumber = '201507071671';
 
     // تنسيق الرسالة بشكل احترافي وجذاب
-    const text = `السلام عليكم، أرغب في طلب خدمة برمجية:\n\n` +
-      `👤 *الاسم:* ${formData.name}\n` +
-      `📞 *رقم الهاتف:* ${formData.phone}\n` +
-      `🛠 *نوع الخدمة:* ${formData.service}\n` +
-      `💬 *التفاصيل:* ${formData.message}`;
+    const labels = content.messageLabels;
+
+    const text = `${content.whatsappHeading}\n\n` +
+      `👤 *${labels.name}:* ${formData.name}\n` +
+      `📞 *${labels.phone}:* ${formData.phone}\n` +
+      `🛠 *${labels.service}:* ${formData.service}\n` +
+      `💬 *${labels.details}:* ${formData.message}`;
 
     // ترميز النص ليتوافق مع روابط الواتساب
     const encodedText = encodeURIComponent(text);
@@ -53,7 +65,7 @@ export default function ContactSection() {
 
     // إظهار حالة النجاح مؤقتاً ثم الانتقال للواتساب
     setIsSubmitted(true);
-    
+
     // فتح رابط الواتساب في تبويب جديد بعد جزء من الثانية لضمان سلاسة التجربة
     setTimeout(() => {
       window.open(whatsappUrl, '_blank');
@@ -62,29 +74,29 @@ export default function ContactSection() {
 
   const contactInfo = [
     {
-      title: 'الهاتف / واتساب',
+      title: content.contactInfo.phoneTitle,
       value: '+20 150 707 1671',
       href: 'https://wa.me/201507071671',
       icon: <FontAwesomeIcon icon={faPhone} />,
       colorClass: 'text-datalynx-primary bg-datalynx-primary/10 border-datalynx-primary/20',
     },
     {
-      title: 'البريد الإلكتروني',
+      title: content.contactInfo.emailTitle,
       value: 'lexoffice.datalynx@proton.me',
       href: 'mailto:lexoffice.datalynx@proton.me',
       icon: <FontAwesomeIcon icon={faEnvelope} />,
       colorClass: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
     },
     {
-      title: 'مقر العمل',
-      value: 'القاهرة، مصر',
+      title: content.contactInfo.locationTitle,
+      value: content.contactInfo.locationValue,
       href: '#',
       icon: <FontAwesomeIcon icon={faLocationDot} />,
       colorClass: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     },
     {
-      title: 'ساعات العمل',
-      value: 'السبت - الخميس: ٩ صباحاً - ٦ مساءً',
+      title: content.contactInfo.hoursTitle,
+      value: content.contactInfo.hoursValue,
       href: '#',
       icon: <FontAwesomeIcon icon={faClock} />,
       colorClass: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -92,8 +104,8 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contact" dir="rtl" className="relative min-h-screen py-28 bg-[#020617] text-right overflow-hidden flex items-center">
-      
+    <section id="contact" dir={isEnglish ? 'ltr' : 'rtl'} className={`relative min-h-screen py-28 bg-[#020617] overflow-hidden flex items-center ${isEnglish ? 'text-left' : 'text-right'}`}>
+
       {/* خلفية الشبكة البرمجية والإضاءات */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-25"></div>
@@ -112,22 +124,25 @@ export default function ContactSection() {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <div className="inline-flex items-center gap-3 mb-4 font-mono text-xs tracking-[0.2em] text-datalynx-primary/90 px-4 py-1.5 rounded-full border border-datalynx-primary/30 bg-datalynx-primary/10 shadow-lg shadow-datalynx-primary/5">
-            <span>٠٤</span>
+            <span>{content.index}</span>
             <span className="w-8 h-px bg-datalynx-primary/40" />
-            <span>START YOUR PROJECT</span>
+            <span>{content.label}</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
-            جاهز لتحويل فكرتك إلى <span className="bg-clip-text text-transparent bg-gradient-to-r from-datalynx-primary via-blue-400 to-indigo-300">واقع رقمي احترافي؟</span>
+            {content.titleLine1}{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-datalynx-primary via-blue-400 to-indigo-300">
+              {content.titleLine2}
+            </span>
           </h2>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-            اختر نوع الخدمة المطلوبة واملأ التفاصيل، وسيتم تحويلك مباشرة عبر الواتساب لمناقشة مشروعك مع فريق <strong className="text-white">Data Lynx</strong> فوراً.
+            {content.description}
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          
+
           {/* بطاقات معلومات التواصل (اليمين) */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -136,11 +151,11 @@ export default function ContactSection() {
           >
             <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl space-y-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-datalynx-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-              
+
               <div>
-                <h3 className="text-2xl font-bold text-white mb-2">قنوات التواصل المباشر</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">{content.infoTitle}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">
-                  نحن نفضل سرعة الاستجابة، تواصل معنا عبر الواتساب أو البريد في أي وقت.
+                  {content.infoText}
                 </p>
               </div>
 
@@ -169,7 +184,7 @@ export default function ContactSection() {
           </motion.div>
 
           {/* نموذج الطلب وتحديد الخدمات (اليسار) */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -177,9 +192,9 @@ export default function ContactSection() {
             className="lg:col-span-7"
           >
             <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden">
-              
+
               {isSubmitted ? (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-16 text-center space-y-5"
@@ -187,88 +202,85 @@ export default function ContactSection() {
                   <div className="w-20 h-20 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                     <FontAwesomeIcon icon={faCheckCircle} />
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-bold text-white">جاري تحويلك إلى واتساب...</h3>
+                  <h3 className="text-2xl md:text-3xl font-bold text-white">{content.sentTitle}</h3>
                   <p className="text-slate-400 max-w-md mx-auto text-sm md:text-base">
-                    تم تجهيز تفاصيل طلبك بنجاح. إذا لم يتم فتح واتساب تلقائياً، يمكنك النقر على الزر أدناه.
+                    {content.sentText}
                   </p>
                   <button
                     onClick={() => setIsSubmitted(false)}
                     className="mt-4 px-8 py-3 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition-colors border border-white/10"
                   >
-                    تعديل البيانات أو إرسال جديد
+                    {content.sentButton}
                   </button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">اختر خدمتك واطلبها فوراً</h3>
-                    <p className="text-slate-400 text-sm">حدد نوع المشروع المناسب لك وسنتولى الباقي.</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">{content.formTitle}</h3>
+                    <p className="text-slate-400 text-sm">{content.formText}</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-300">الاسم الكريم</label>
-                      <input 
+                      <label className="block text-xs font-bold text-slate-300">{content.fields.name}</label>
+                      <input
                         required
-                        type="text" 
+                        type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="أدخل اسمك أو اسم شركتك" 
+                        placeholder={content.fields.namePlaceholder}
                         className="w-full bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-datalynx-primary transition-all shadow-inner"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-300">رقم الهاتف / الواتساب</label>
-                      <input 
+                      <label className="block text-xs font-bold text-slate-300">{content.fields.phone}</label>
+                      <input
                         required
-                        type="tel" 
+                        type="tel"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="01xxxxxxxxx" 
+                        placeholder={content.fields.phonePlaceholder}
                         className="w-full bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-datalynx-primary transition-all shadow-inner"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-300">نوع الخدمة المطلوبة</label>
-                    <select 
+                    <label className="block text-xs font-bold text-slate-300">{content.fields.service}</label>
+                    <select
                       name="service"
                       value={formData.service}
                       onChange={handleChange}
                       className="w-full bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-datalynx-primary transition-all shadow-inner cursor-pointer"
                     >
-                      <option value="موقع تجاري متكامل" className="bg-slate-900">🛒 موقع تجاري متكامل (متجر إلكتروني)</option>
-                      <option value="موقع تعريفى / شركة" className="bg-slate-900">🏢 موقع تعريفي للشركات والأعمال</option>
-                      <option value="موقع شخصي (بورتفوليو)" className="bg-slate-900">👤 موقع شخصي أو معرض أعمال (Portfolio)</option>
-                      <option value="صفحة هبوط / صفحة واحدة" className="bg-slate-900">🚀 صفحة هبوط تسويقية (Landing Page)</option>
-                      <option value="برمجيات وحلول قانونية (Lex Office)" className="bg-slate-900">⚖️ برمجيات وحلول قانونية (Lex Office)</option>
-                      <option value="تخصيص أنظمة Odoo ERP" className="bg-slate-900">⚙️ تخصيص أنظمة إدارة الموارد Odoo ERP</option>
-                      <option value="تطبيق موبايل (React Native)" className="bg-slate-900">📱 تطبيق موبايل (أندرويد / آيفون)</option>
-                      <option value="برمجيات مخصصة أخرى" className="bg-slate-900">💻 برمجيات سطح مكتب أو حلول مخصصة</option>
+                      {content.serviceOptions.map((option) => (
+                        <option key={option} value={option} className="bg-slate-900">
+                          {option}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-300">تفاصيل إضافية عن فكرتك أو مشروعك</label>
-                    <textarea 
+                    <label className="block text-xs font-bold text-slate-300">{content.fields.message}</label>
+                    <textarea
                       required
                       rows={4}
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="اخبرنا باختصار عن أهدافك، الميزات التي ترغب بها، أو أي تفاصيل أخرى..." 
+                      placeholder={content.fields.messagePlaceholder}
                       className="w-full bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-datalynx-primary transition-all resize-none shadow-inner"
                     ></textarea>
                   </div>
 
-                  <button 
+                  <button
                     type="submit"
                     className="w-full py-4 bg-gradient-to-r from-datalynx-primary to-blue-600 hover:from-blue-600 hover:to-datalynx-primary text-white font-bold rounded-2xl transition-all shadow-[0_0_25px_rgba(59,130,246,0.4)] flex items-center justify-center gap-3 text-base group"
                   >
-                    <span>إرسال الطلب والانتقال للواتساب</span>
+                    <span>{content.fields.submit}</span>
                     <FontAwesomeIcon icon={faPaperPlane} className="text-sm transition-transform group-hover:-translate-x-1" />
                   </button>
                 </form>
@@ -276,6 +288,31 @@ export default function ContactSection() {
             </div>
           </motion.div>
 
+        </div>
+
+        {/*
+          إشارة إلى أدوات النطاق الفرعي. القسم يتحدث عن الخدمات، فنُضيف
+          هنا رابط الأدوات حتى لا يقتصر ذكره على النافبار والتذييل.
+        */}
+        <div className="mt-12 bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-right">
+          <div>
+            <h4 className="text-xl font-bold text-white mb-2">
+              {isEnglish ? 'Need a quick task done on a file?' : 'محتاج مهمة سريعة على ملف؟'}
+            </h4>
+            <p className="text-slate-400 text-sm">
+              {isEnglish
+                ? 'The free Data Lynx tools run immediately in your browser: compress images and PDFs, convert formats and prepare files for online portals.'
+                : 'أدوات Data Lynx المجانية تعمل فورًا داخل المتصفح: ضغط الصور وملفات PDF، تحويل الصيغ، وتجهيز الملفات للبوابات الإلكترونية.'}
+            </p>
+          </div>
+          <a
+            href={TOOLS_SITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3.5 bg-datalynx-primary text-white rounded-xl font-bold text-sm shrink-0 hover:bg-blue-600 transition-colors shadow-lg shadow-datalynx-primary/20"
+          >
+            {isEnglish ? 'Open tools.datalynx.space' : 'افتح tools.datalynx.space'}
+          </a>
         </div>
       </div>
     </section>

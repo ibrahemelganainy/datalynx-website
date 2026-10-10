@@ -11,7 +11,27 @@ import {
   faMicrochip
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useLocale } from './LocaleProvider';
+import { heroContent } from '../heroContent';
+
 export default function Hero() {
+  /*
+   * النصوص تتبع اللغة الحالية. القسم نفسه لا يعرف اللغة، بل يقرأها من
+   * LocaleProvider، فيعمل في الصفحة الرئيسية العربية / وفي /en بنفس
+   * التصميم تمامًا.
+   */
+  const { locale } = useLocale();
+
+  const content = heroContent[locale] || heroContent.ar;
+
+  const isEnglish = locale === 'en';
+
+  const homeHref = isEnglish ? '/en' : '/';
+
+  /* الجوال لا يمر عبر Hero، لكن الرابط يبقى صحيحًا من أي سياق. */
+  const contactHref = `${homeHref}#contact`;
+  const servicesHref = `${homeHref}#services`;
+
   // إعدادات الحركة (Framer Motion Variants)
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -28,7 +48,7 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#020617] pt-20">
-      
+
       {/* خلفية جمالية (إضاءات وشبكة) */}
       <div className="absolute inset-0 w-full h-full">
         {/* شبكة برمجية خفيفة */}
@@ -41,7 +61,7 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
         <div className="flex flex-col items-center text-center">
-          
+
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -52,33 +72,33 @@ export default function Hero() {
             <motion.div variants={itemVariants} className="mb-6">
               <span className="px-4 py-1.5 rounded-full border border-datalynx-primary/30 bg-datalynx-primary/10 text-datalynx-primary text-sm font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-datalynx-primary animate-pulse"></span>
-                وكالة برمجيات شاملة
+                {content.badge}
               </span>
             </motion.div>
 
             {/* العنوان الرئيسي */}
             <motion.div variants={itemVariants} className="mb-6 relative">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight md:leading-tight">
-                نبني مستقبلك الرقمي <br />
+                {content.titleLine1} <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-datalynx-primary to-blue-300">
-                  بحلول برمجية متكاملة
+                  {content.titleLine2}
                 </span>
               </h1>
             </motion.div>
 
             {/* الوصف */}
             <motion.p variants={itemVariants} className="text-slate-400 text-base md:text-xl mb-10 max-w-2xl leading-relaxed">
-              من تصميم المواقع والمتاجر الإلكترونية، إلى بناء أنظمة إدارة شاملة وتخصيص أنظمة Odoo. نحن في <strong className="text-white">Data Lynx</strong> نحول أفكارك إلى واقع رقمي يتجاوز طموحاتك.
+              {content.description}
             </motion.p>
 
             {/* الأزرار */}
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <a href="#contact" className="group relative px-8 py-4 bg-datalynx-primary text-white rounded-xl font-bold text-lg overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-3">
-                <span className="relative z-10">ابدأ مشروعك الآن</span>
+              <a href={contactHref} className="group relative px-8 py-4 bg-datalynx-primary text-white rounded-xl font-bold text-lg overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-3">
+                <span className="relative z-10">{content.primaryCta}</span>
                 <FontAwesomeIcon icon={faRocket} className="relative z-10 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
               </a>
-              <a href="#services" className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-3">
-                استكشف خدماتنا
+              <a href={servicesHref} className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-3">
+                {content.secondaryCta}
                 <FontAwesomeIcon icon={faArrowLeft} className="text-sm" />
               </a>
             </motion.div>
@@ -86,9 +106,9 @@ export default function Hero() {
         </div>
 
         {/* الكروت العائمة (Floating Cards) التي تعطي لمسة احترافية وتوضح تخصصاتكم */}
-        
+
         {/* كارت 1: العيادات والمنشآت (يمين الشاشة) */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
@@ -98,15 +118,15 @@ export default function Hero() {
             <FontAwesomeIcon icon={faLaptopMedical} />
           </div>
           <div>
-            <span className="block text-white font-bold text-sm mb-1">أنظمة متكاملة</span>
+            <span className="block text-white font-bold text-sm mb-1">{content.cardOneTitle}</span>
             <span className="block text-slate-400 text-xs w-40 leading-relaxed">
-             نبني لك حلولاً برمجية مخصصة ومواقع احترافية تدعم نمو وتطوير نشاطك التجاري.
+             {content.cardOneText}
             </span>
           </div>
         </motion.div>
 
         {/* كارت 2: ليكس أوفيس (يسار الشاشة) */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
@@ -117,9 +137,9 @@ export default function Hero() {
             <FontAwesomeIcon icon={faMicrochip} />
           </div>
           <div>
-            <span className="block text-white font-bold text-sm mb-1">التحول الرقمي</span>
+            <span className="block text-white font-bold text-sm mb-1">{content.cardTwoTitle}</span>
             <span className="block text-slate-400 text-xs w-48 leading-relaxed">
-             حوّل فكرتك إلى منصة رقمية ذكية.
+             {content.cardTwoText}
             </span>
           </div>
         </motion.div>
