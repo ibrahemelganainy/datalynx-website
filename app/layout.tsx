@@ -84,6 +84,15 @@ export const metadata: Metadata = {
   },
 
   category: "technology",
+
+  /*
+   * علامة التحقق من ملكية الموقع في Google AdSense.
+   * تُحقن كـ <meta name="google-adsense-account" content="ca-pub-1270749804293495">
+   * داخل وسم <head>، وهي مطلوبة لقبول الموقع وإثبات ملكيته.
+   */
+  other: {
+    "google-adsense-account": "ca-pub-1270749804293495",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
