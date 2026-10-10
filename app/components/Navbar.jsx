@@ -6,7 +6,14 @@ import { useLocale } from './LocaleProvider';
 import { getAlternatePath, TOOLS_SITE_URL } from '../lib/i18n/config';
 import React, { useState, useEffect } from 'react'
 
-export default function Navbar() {
+/*
+ * الصفحة الرئيسية لا تمرر شيئًا لأن قسم Hero لونه #020617، وهو نفس
+ * لون body، فيبدو النافبار شفافًا عليها تلقائيًا. أما الصفحات الداخلية
+ * (من نحن، اتصل بنا، الخصوصية) فتمرر transparentAtTop لكي يعمل
+ * النافبار بنفس شكل الصفحة الرئيسية: شفاف في الأعلى بخلفية الصفحة
+ * الشبكية، ويصبح أبيض عند التمرير.
+ */
+export default function Navbar({ transparentAtTop = false }) {
   const { locale } = useLocale();
 
   const pathname = usePathname();
@@ -38,6 +45,14 @@ export default function Navbar() {
   const contactHref = pathname === homeHref ? '#contact' : `${homeHref}#contact`;
 
   const [isOpen, setIsOpen] = useState(false)
+
+  /*
+   * الحالة الابتدائية دائمًا false = شفاف، وهذا هو السلوك الصحيح لكل
+   * الصفحات عند فتحها من أعلى. لا نستخدم lazy initializer يقرأ window
+   * لأن الخادم لا يملك window؛ ولذلك نضبط الحالة بعد mount فقط عبر
+   * handleScroll داخل useEffect أدناه، فيتفق HTML المُولَّد مع أول رسم
+   * في المتصفح ولا يوجد اختلاف يسبب خطأ hydration.
+   */
   const [isScrolled, setIsScrolled] = useState(false)
 
   // تغيير شكل النافبار عند التمرير
@@ -45,9 +60,17 @@ export default function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
+
+    /*
+     * مزامنة فورية مع موضع التمرير الفعلي. ضرورية في الصفحات الداخلية
+     * لأن HTML المُولَّد يبدأ شفافًا، فلو فُتحت الصفحة وهي مُمرَّرة
+     * مسبقًا (تحديث أو رجوع) يجب أن يصبح النافبار أبيض فورًا.
+     */
+    handleScroll()
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [transparentAtTop])
 
   /*
    * روابط التنقل.

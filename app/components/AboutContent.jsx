@@ -42,16 +42,30 @@ export default function AboutContent({ lang = 'ar' }) {
       lang={lang}
       dir={isEnglish ? 'ltr' : 'rtl'}
     >
-      <Navbar />
+      {/*
+        نافبار الصفحات الداخلية شفاف كما في الصفحة الرئيسية، لتحصل على
+        نفس الخلفية والحشوة العليا (py-5).
+      */}
+      <Navbar transparentAtTop />
 
-      <main className="pt-32 pb-20">
-        {/* Hero */}
+      {/*
+        لا يوجد أي عنصر بلون خلفية في هذه الصفحة: لون الخلفية يأتي من
+        body (#020617)، والشبكة طبقة ثابتة واحدة تغطي الصفحة كلها.
+      */}
+      <main className="relative pt-32 pb-20">
+        {/*
+          الخلفية الموحدة: تبدأ من أعلى الصفحة (top-0) وتمتد إلى أسفلها،
+          وتظهر من خلف النافبار الشفاف أيضًا. استخدمنا fade-grid (بلا
+          mask) فنفس كثافة الشبكة تبقى في كل الصفحة بدل أن تخف في
+          الأطراف.
+        */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-datalynx-primary/10 blur-[150px]" />
+          {/* نفس شبكة الـHero بالحرف: opacity-20 ونفس الـradial mask. */}
+          <div className="absolute inset-0 fade-grid opacity-20 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+        </div>
+
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-datalynx-primary/10 blur-[150px]" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10" />
-          </div>
-
           <div className="max-w-5xl mx-auto px-5 sm:px-6 relative z-10">
             {/* العنوان المقدمة */}
             <div className="text-center mb-14">
