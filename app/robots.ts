@@ -19,6 +19,6 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: 'https://datalynx.space/sitemap.xml',
-    host: 'https://datalynx.space',
+    
   };
 }
